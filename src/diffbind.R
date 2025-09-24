@@ -48,3 +48,17 @@ dim(data)
 # for each row (feature), MAD is calulated by: ‘constant * cMedian(abs(x - center))’, where constant: 1.4826, so 1.4826 x median(|value-median(vector)|)
 data1 = FSbyMAD(data, cut.type="topk", value=10000)
 write.table(data1,file="mat.txt")
+
+# keep non +/-1kbTSS region overlapped peeks
+data = read.csv('BindingAffinityMatrix.csv', sep="\t", header=FALSE)
+rownames(data) = paste(data$V1,data$V2,data$V3,sep="-")
+data = data.matrix(data[1:nrow(data),4:ncol(data)])
+dim(data)
+
+annot = read.table("consensus_peaks.final.bed", header = F)
+annot = annot[annot$V4 != 4,]
+nonTSS = paste(annot$V1, annot$V2, annot$V3,sep="-")
+data = data[rownames(data) %in% nonTSS,]
+write.table(data,file="BindingAffinityMatrix.csv")
+data1 = FSbyMAD(data, cut.type="topk", value=10000)
+write.table(data1,file="mat.txt")
